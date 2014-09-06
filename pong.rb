@@ -23,6 +23,7 @@ class PongGame < BasicGame
   end
 
   def init(container)
+  	@speed = 1
   	@p1_score = 0
   	@p2_score = 0
   	@bg = Image.new('data/bg.png')
@@ -54,20 +55,19 @@ class PongGame < BasicGame
   end
 
   def ball_movement(container, delta)
-  	@ball.x += 0.3 * delta * Math.cos(@ball.angle * Math::PI / 180)
-		@ball.y -= 0.3 * delta * Math.sin(@ball.angle * Math::PI / 180)
+  	@ball.x += 0.3 * delta * Math.cos(@ball.angle * Math::PI / 180) * @speed
+		@ball.y -= 0.3 * delta * Math.sin(@ball.angle * Math::PI / 180) * @speed
 
-		if (@ball.x > container.width - @ball.image.width) || (@ball.y < 0) || (@ball.x < 0)
+		hit_paddle(container, delta)
+		off_screen(container, delta)
+  end
+
+  def off_screen(container, delta)
+  	if (@ball.x > container.width - @ball.image.width) || (@ball.y < 0) || (@ball.x < 0)
 		  @ball.angle = (@ball.angle + 90) % 360
 		end
 
-		if @ball.x >= @p1_paddle.x && @ball.x <= (@p1_paddle.x + @p1_paddle.image.width) && @ball.y.round >= (400 - @ball.image.height)
-			@ball.angle = (@ball.angle + 90) % 360
-		elsif @ball.x >= @p2_paddle.x && @ball.x <= (@p2_paddle.x + @p2_paddle.image.width) && @ball.y.round <= (90 - @ball.image.height)
-			@ball.angle = (@ball.angle + 90) % 360
-		end
-
-		if @ball.y > container.height
+  	if @ball.y > container.height
 			@p2_score += 1
 			reset_game
 		elsif @ball.y < 0
@@ -76,11 +76,22 @@ class PongGame < BasicGame
 		end
   end
 
+  def hit_paddle(container, delta)
+  	if @ball.x >= @p1_paddle.x && @ball.x <= (@p1_paddle.x + @p1_paddle.image.width) && @ball.y.round >= (400 - @ball.image.height)
+			@ball.angle = (@ball.angle + 90) % 360
+			#@speed += 0.05
+		elsif @ball.x >= @p2_paddle.x && @ball.x <= (@p2_paddle.x + @p2_paddle.image.width) && @ball.y.round <= (100 - @ball.image.height)
+			@ball.angle = (@ball.angle + 90) % 360
+			#@speed += 0.05
+		end
+  end
+
   def reset_game
   	@p1_paddle.x = 200
 	  @ball.x = 200
 	  @ball.y = 200
 	  @ball.angle = 45
+	  @speed = 1
   end
 
 end
